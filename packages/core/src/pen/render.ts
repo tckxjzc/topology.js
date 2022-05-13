@@ -43,7 +43,8 @@ function drawBkLinearGradient(ctx: CanvasRenderingContext2D, pen: Pen) {
     pen.calculative.worldRect,
     pen.calculative.gradientFromColor,
     pen.calculative.gradientToColor,
-    pen.calculative.gradientAngle
+    pen.calculative.gradientAngle,
+    pen.calculative.gradientCenterColor
   );
 }
 
@@ -100,7 +101,8 @@ function linearGradient(
   worldRect: Rect,
   fromColor: string,
   toColor: string,
-  angle: number
+  angle: number,
+  centerColor?: string,
 ) {
   if (!fromColor || !toColor) {
     return;
@@ -134,6 +136,7 @@ function linearGradient(
   // contributor: https://github.com/sunnyguohua/topology
   const grd = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
   grd.addColorStop(0, fromColor);
+  centerColor && grd.addColorStop(0.5, centerColor);
   grd.addColorStop(1, toColor);
   return grd;
 }

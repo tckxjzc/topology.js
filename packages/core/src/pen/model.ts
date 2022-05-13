@@ -285,6 +285,7 @@ export interface Pen extends Rect {
     bkType?: number;
     gradientFromColor?: string;
     gradientToColor?: string;
+    gradientCenterColor?: string;
     gradientAngle?: number;
     gradientRadius?: number;
 
