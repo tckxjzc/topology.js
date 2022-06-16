@@ -777,8 +777,9 @@ export class Canvas {
         pen.y = e.y - pen.height / 2;
       }
     }
-    await this.addPens(pens, true);
-    this.active(pens.filter((pen) => !pen.parentId));
+    const result = await this.addPens(pens, true);
+    // cus-fix 返回空时不active
+    this.active(result.filter((pen) => !pen.parentId));
     this.render();
     this.externalElements.focus(); // 聚焦
   }
