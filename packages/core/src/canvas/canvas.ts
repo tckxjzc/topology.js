@@ -3930,7 +3930,7 @@ export class Canvas {
     this.delete(pens);
   }
 
-  async paste() {
+  async paste(x=0,y=0) {
     // 先读剪切板
     let clipboardText = await navigator.clipboard?.readText();
     navigator.clipboard?.writeText(''); // 清空
@@ -3957,8 +3957,25 @@ export class Canvas {
     this.store.clipboard = deepClone(this.store.clipboard, true);
     // this.store.clipboard 已经包括子节点
     // pastePen 是一个递归操作，只要遍历 父亲节点即可
-    const rootPens = this.store.clipboard.pens.filter((pen) => !pen.parentId);
+    this.store.clipboard.origin.x=0;
+    this.store.clipboard.origin.y=0;
+    const rootPens = this.store.clipboard.pens.filter((pen) => {
+      delete pen.calculative;
+      delete pen.center;
+      delete pen.ex;
+      delete pen.ey;
+      return !pen.parentId;
+    });
+    //cus-fix 粘贴支持更改位置
+    let diffX=0,diffY=0;
+    if(rootPens.length && x && y){
+       diffX = x - rootPens[0].x;
+       diffY = y - rootPens[0].y;
+    }
     for (const pen of rootPens) {
+      // debugger;
+      pen.x = pen.x + diffX;
+      pen.y = pen.y + diffY;
       this.pastePen(pen, undefined, this.store.clipboard);
     }
 
@@ -3966,7 +3983,7 @@ export class Canvas {
     this.pushHistory({ type: EditType.Add, pens: this.store.clipboard.pens });
     this.render();
     this.store.emitter.emit('add', this.store.clipboard.pens);
-    localStorage.removeItem(this.clipboardName); // 清空缓存
+    // localStorage.removeItem(this.clipboardName); // 清空缓存
   }
 
   /**
@@ -4003,7 +4020,7 @@ export class Canvas {
     if (!this.beforeAddPen || this.beforeAddPen(pen) == true) {
       this.makePen(pen);
       if (!pen.parentId) {
-        const rect = this.getPenRect(pen, clipboard.origin, clipboard.scale);
+        const rect = this.getPenRect(pen, undefined, 1);
         this.setPenRect(pen, rect, false);
       }
       const newChildren = [];

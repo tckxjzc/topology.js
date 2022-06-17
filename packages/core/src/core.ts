@@ -747,8 +747,8 @@ export class Topology {
     this.canvas.cut(pens);
   }
 
-  paste() {
-    this.canvas.paste();
+  paste(x=0,y=0) {
+    this.canvas.paste(x,y);
   }
 
   undo() {
