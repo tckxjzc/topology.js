@@ -365,8 +365,8 @@ export class Canvas {
     ) {
       return;
     }
-    let x = 10;
-    let y = 10;
+    let x = 1;
+    let y = 1;
     switch (e.key) {
       case ' ':
         this.hotkeyType = HotkeyType.Translate;
@@ -425,7 +425,7 @@ export class Canvas {
           this.translateMovingAnchor(-1, 0);
           break;
         }
-        x = -10;
+        x = -1;
         if (e.shiftKey) {
           x = -5;
         }
@@ -439,7 +439,7 @@ export class Canvas {
           this.translateMovingAnchor(0, -1);
           break;
         }
-        y = -10;
+        y = -1;
         if (e.shiftKey) {
           y = -5;
         }
@@ -3929,8 +3929,10 @@ export class Canvas {
     this.copy(pens);
     this.delete(pens);
   }
-
+  // cus-fix
   async paste(x=0,y=0) {
+    // 是否重置缩放
+    const resetFlag = !!(x||y);
     // 先读剪切板
     let clipboardText = await navigator.clipboard?.readText();
     navigator.clipboard?.writeText(''); // 清空
@@ -3943,13 +3945,16 @@ export class Canvas {
       try {
         clipboard = JSON.parse(clipboardText);
       } catch (e) {
-        console.warn('剪切板数据不是 json', e.message);
+        console.warn('剪切板数据不是 json', e.message,clipboard);
         return;
       }
       if (!clipboard || !clipboard.topology || !clipboard.data) {
         return;
       }
       this.store.clipboard = clipboard.data;
+    }else {
+      console.warn('剪切板无数据');
+      return;
     }
     if (this.beforeAddPens && (await this.beforeAddPens(this.store.clipboard.pens)) != true) {
       return;
@@ -3957,25 +3962,34 @@ export class Canvas {
     this.store.clipboard = deepClone(this.store.clipboard, true);
     // this.store.clipboard 已经包括子节点
     // pastePen 是一个递归操作，只要遍历 父亲节点即可
-    this.store.clipboard.origin.x=0;
-    this.store.clipboard.origin.y=0;
+    if(resetFlag){
+      this.store.clipboard.origin = undefined;
+      this.store.clipboard.scale = 1;
+    }
     const rootPens = this.store.clipboard.pens.filter((pen) => {
-      delete pen.calculative;
-      delete pen.center;
-      delete pen.ex;
-      delete pen.ey;
+      if(resetFlag){
+        delete pen.calculative;
+        delete pen.center;
+        delete pen.ex;
+        delete pen.ey;
+      }
       return !pen.parentId;
     });
     //cus-fix 粘贴支持更改位置
     let diffX=0,diffY=0;
-    if(rootPens.length && x && y){
-       diffX = x - rootPens[0].x;
-       diffY = y - rootPens[0].y;
+    if(resetFlag){
+      if(rootPens.length && x && y){
+        diffX = x - rootPens[0].x;
+        diffY = y - rootPens[0].y;
+      }
     }
     for (const pen of rootPens) {
       // debugger;
       pen.x = pen.x + diffX;
       pen.y = pen.y + diffY;
+      if(resetFlag && pen.name==='text' && pen.fontSize > Math.min(pen.width,pen.height)){
+        pen.fontSize = Math.min(pen.width,pen.height)*0.9;
+      }
       this.pastePen(pen, undefined, this.store.clipboard);
     }
 
@@ -4020,7 +4034,7 @@ export class Canvas {
     if (!this.beforeAddPen || this.beforeAddPen(pen) == true) {
       this.makePen(pen);
       if (!pen.parentId) {
-        const rect = this.getPenRect(pen, undefined, 1);
+        const rect = this.getPenRect(pen, clipboard.origin, clipboard.scale);
         this.setPenRect(pen, rect, false);
       }
       const newChildren = [];
