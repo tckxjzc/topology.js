@@ -1286,8 +1286,8 @@ export class Canvas {
     }
 
     if (this.mouseDown) {
-      // 画布平移操作提前
-      if (this.mouseRight === MouseRight.Down) {
+      // 画布平移操作提前 // cus-fix 预览模式左键也能拖动
+      if (this.mouseRight === MouseRight.Down || this.store.data.locked === LockState.DisableMove) {
         this.mouseRight = MouseRight.Translate;
         console.warn('mousemove', this.mouseRight);
       }

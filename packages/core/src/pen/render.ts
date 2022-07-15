@@ -1271,7 +1271,8 @@ export function setNodeAnimate(pen: Pen, now: number) {
   if (!pen.animateCycle) {
     pen.animateCycle = Infinity;
   }
-
+  // 计算进度辅助
+  let durationDiff = 0;
   if (!pen.calculative.start) {
     pen.calculative.start = now;
     pen.calculative.frameIndex = 0;
@@ -1309,6 +1310,7 @@ export function setNodeAnimate(pen: Pen, now: number) {
     for (const frame of pen.frames) {
       d += frame.duration;
       if (pos > d) {
+        durationDiff += frame.duration;
         ++frameIndex;
       } else {
         break;
@@ -1338,12 +1340,12 @@ export function setNodeAnimate(pen: Pen, now: number) {
       pen.calculative.rotate = pen.calculative.initRect.rotate || 0;
 
       pen.lastFrame = {};
-      const frame = pen.frames[frameIndex - 1];
-      for (const k in frame) {
-        pen.lastFrame[k] = frame[k];
-      }
 
       if (frameIndex > 0) {
+        const frame = pen.frames[frameIndex - 1];
+        for (const k in frame) {
+          pen.lastFrame[k] = frame[k];
+        }
         Object.assign(pen.lastFrame, {
           rotate: pen.frames[frameIndex - 1].rotate || 0,
           x: pen.frames[frameIndex - 1].x || 0,
@@ -1360,8 +1362,9 @@ export function setNodeAnimate(pen: Pen, now: number) {
       }
     }
   }
-
-  const process = ((now - pen.calculative.frameStart) / pen.calculative.frameDuration) % 1;
+  // cus-fix durationDiff 修复进度不正确的问题
+  const process = ((now - pen.calculative.frameStart - durationDiff) / pen.calculative.frameDuration) % 1;
+  // console.log('------',(now - pen.calculative.frameStart),pen.calculative.frameDuration,process);
   setNodeAnimateProcess(pen, process);
 
   return true;
