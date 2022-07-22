@@ -423,6 +423,7 @@ export interface Pen extends Rect {
   onInput?: (pen: Pen, text: string) => void;
   onChangeId?: (pen: Pen, oldId: string, newId: string) => void;
   angle?: number;
+  closed?: boolean;
 }
 
 /**

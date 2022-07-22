@@ -2,7 +2,7 @@ import { Pen } from '../pen';
 
 export function circle(pen: Pen, ctx?: CanvasRenderingContext2D): Path2D {
   const path = !ctx ? new Path2D() : ctx;
-  const { angle } = pen;
+  const { angle,closed } = pen;
   const { x, y, width, height } = pen.calculative.worldRect;
   let radiusX = width / 2;
   let radiusY = height / 2;
@@ -28,7 +28,7 @@ export function circle(pen: Pen, ctx?: CanvasRenderingContext2D): Path2D {
     0,
       angle ? angle / 180 * Math.PI : Math.PI * 2
   );
-  if(angle && angle < 360){
+  if(angle && angle < 360 && closed){
     path.lineTo(centerX, centerY);
     path.closePath();
   }

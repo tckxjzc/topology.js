@@ -883,7 +883,7 @@ export function calcWorldRects(pen: Pen) {
     calcCenter(rect);
   } else {
     const parent = store.pens[pen.parentId];
-    let parentRect = parent.calculative.worldRect;
+    let parentRect = parent?.calculative.worldRect;
     if (!parentRect) {
       parentRect = calcWorldRects(parent);
     }
@@ -932,6 +932,7 @@ export function calcPenRect(pen: Pen) {
     pen.height = pen.calculative.worldRect.height;
     return;
   }
+  // todo  continue
   const store = pen.calculative.canvas.store;
   const parentRect = store.pens[pen.parentId].calculative.worldRect;
   pen.x = (pen.calculative.worldRect.x - parentRect.x) / parentRect.width;

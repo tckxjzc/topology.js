@@ -1289,7 +1289,6 @@ export class Canvas {
       // 画布平移操作提前 // cus-fix 预览模式左键也能拖动
       if (this.mouseRight === MouseRight.Down || this.store.data.locked === LockState.DisableMove) {
         this.mouseRight = MouseRight.Translate;
-        console.warn('mousemove', this.mouseRight);
       }
       // Translate
       if (
@@ -1491,7 +1490,7 @@ export class Canvas {
     e.x -= this.bounding.left || this.bounding.x;
     e.y -= this.bounding.top || this.bounding.y;
 
-    console.warn('mouseRight', this.mouseRight);
+    // console.warn('mouseRight', this.mouseRight);
     if (this.mouseRight === MouseRight.Down) {
       this.store.emitter.emit('contextmenu', {
         e,
@@ -4405,6 +4404,11 @@ export class Canvas {
       // 上面会更新 calculative.text 下方置空
       pen.calculative.text = '';
       this.calcActiveRect();
+      // cus-add
+      this.store.emitter.emit('updateDropdownListValue', {
+        pen,
+        params: { ...pen.dropdownList[index] }
+      });
     } else {
       pen.text = pen.dropdownList[index] + '';
     }
